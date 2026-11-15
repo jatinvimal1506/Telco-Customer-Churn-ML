@@ -1,0 +1,10 @@
+artifact_location: file:///C:/Users/kaila/OneDrive/Desktop/DS3010_Project/telco-churn/mlruns/680940653408173775/models/m-53728f1aebd547cab263e90d562465c6/artifacts
+creation_timestamp: 1794760744453
+experiment_id: '680940653408173775'
+last_updated_timestamp: 1794760773059
+model_id: m-53728f1aebd547cab263e90d562465c6
+model_type: null
+name: model
+source_run_id: e8845c607918411a826d5399ed5f3ba5
+status: 2
+status_message: null

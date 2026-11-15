@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/kaila/OneDrive/Desktop/DS3010_Project/telco-churn/mlruns/680940653408173775/c67fbed1f9de4baa9af420a8845eac59/artifacts
+end_time: 1794760702399
+entry_point_name: ''
+experiment_id: '680940653408173775'
+lifecycle_stage: active
+run_id: c67fbed1f9de4baa9af420a8845eac59
+run_name: delicate-snail-544
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1794760688031
+status: 4
+tags: []
+user_id: kaila

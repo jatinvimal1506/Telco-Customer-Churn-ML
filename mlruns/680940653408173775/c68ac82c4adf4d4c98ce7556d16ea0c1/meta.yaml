@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/kaila/OneDrive/Desktop/DS3010_Project/telco-churn/mlruns/680940653408173775/c68ac82c4adf4d4c98ce7556d16ea0c1/artifacts
+end_time: 1794760646654
+entry_point_name: ''
+experiment_id: '680940653408173775'
+lifecycle_stage: active
+run_id: c68ac82c4adf4d4c98ce7556d16ea0c1
+run_name: adorable-seal-548
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1794760638184
+status: 4
+tags: []
+user_id: kaila

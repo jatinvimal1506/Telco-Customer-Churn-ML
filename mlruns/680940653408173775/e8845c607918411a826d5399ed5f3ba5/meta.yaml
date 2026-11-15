@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/kaila/OneDrive/Desktop/DS3010_Project/telco-churn/mlruns/680940653408173775/e8845c607918411a826d5399ed5f3ba5/artifacts
+end_time: 1794760783976
+entry_point_name: ''
+experiment_id: '680940653408173775'
+lifecycle_stage: active
+run_id: e8845c607918411a826d5399ed5f3ba5
+run_name: legendary-mink-431
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1794760735336
+status: 3
+tags: []
+user_id: kaila

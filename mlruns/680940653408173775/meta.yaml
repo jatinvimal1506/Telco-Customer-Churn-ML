@@ -1,0 +1,9 @@
+artifact_location: file:///C:/Users/kaila/OneDrive/Desktop/DS3010_Project/telco-churn/mlruns/680940653408173775
+creation_time: 1794760637287
+effective_trace_archival_retention: null
+experiment_id: '680940653408173775'
+last_update_time: 1794760637287
+lifecycle_stage: active
+name: Telco Churn
+trace_location: null
+workspace: default

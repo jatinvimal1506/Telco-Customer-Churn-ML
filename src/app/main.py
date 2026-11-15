@@ -1,0 +1,166 @@
+"""
+FASTAPI + GRADIO SERVING APPLICATION - Production-Ready ML Model Serving
+========================================================================
+
+This application provides a complete serving solution for the Telco Customer Churn model
+with both programmatic API access and a user-friendly web interface.
+
+Architecture:
+- FastAPI: High-performance REST API with automatic OpenAPI documentation
+- Gradio: User-friendly web UI for manual testing and demonstrations
+- Pydantic: Data validation and automatic API documentation
+"""
+
+import os
+import sys
+
+# Ensure project root is in sys.path
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+from fastapi import FastAPI
+from pydantic import BaseModel, Field
+from typing import Optional
+import gradio as gr
+from src.serving.inference import predict  # Core ML inference logic
+
+# Initialize FastAPI application
+app = FastAPI(
+    title="Telco Customer Churn Prediction API",
+    description="ML API for predicting customer churn in telecom industry",
+    version="1.0.0"
+)
+
+# === HEALTH CHECK ENDPOINT ===
+@app.get("/")
+def root():
+    """
+    Health check endpoint for monitoring and load balancer health checks.
+    """
+    return {"status": "ok"}
+
+# === REQUEST DATA SCHEMA ===
+class CustomerData(BaseModel):
+    """
+    Customer data schema for churn prediction.
+    Defines the customer features required for churn prediction.
+    """
+    gender: str
+    Partner: str
+    Dependents: str
+    PhoneService: str
+    MultipleLines: str
+    InternetService: str
+    OnlineSecurity: str
+    OnlineBackup: str
+    DeviceProtection: str
+    TechSupport: str
+    StreamingTV: str
+    StreamingMovies: str
+    Contract: str
+    PaperlessBilling: str
+    PaymentMethod: str
+    tenure: int
+    MonthlyCharges: float
+    TotalCharges: float
+    SeniorCitizen: Optional[int] = 0
+
+# === MAIN PREDICTION API ENDPOINT ===
+@app.post("/predict")
+def get_prediction(data: CustomerData):
+    """
+    Main prediction endpoint for customer churn prediction.
+    """
+    try:
+        # Pydantic v2 model_dump or v1 dict fallback
+        payload = data.model_dump() if hasattr(data, "model_dump") else data.dict()
+        result = predict(payload)
+        return {"prediction": result}
+    except Exception as e:
+        return {"error": str(e)}
+
+# === GRADIO WEB INTERFACE ===
+def gradio_interface(
+    gender, Partner, Dependents, PhoneService, MultipleLines,
+    InternetService, OnlineSecurity, OnlineBackup, DeviceProtection,
+    TechSupport, StreamingTV, StreamingMovies, Contract,
+    PaperlessBilling, PaymentMethod, tenure, MonthlyCharges, TotalCharges,
+    SeniorCitizen="No"
+):
+    sc_val = 1 if SeniorCitizen == "Yes" else 0
+    data = {
+        "gender": gender,
+        "SeniorCitizen": sc_val,
+        "Partner": Partner,
+        "Dependents": Dependents,
+        "PhoneService": PhoneService,
+        "MultipleLines": MultipleLines,
+        "InternetService": InternetService,
+        "OnlineSecurity": OnlineSecurity,
+        "OnlineBackup": OnlineBackup,
+        "DeviceProtection": DeviceProtection,
+        "TechSupport": TechSupport,
+        "StreamingTV": StreamingTV,
+        "StreamingMovies": StreamingMovies,
+        "Contract": Contract,
+        "PaperlessBilling": PaperlessBilling,
+        "PaymentMethod": PaymentMethod,
+        "tenure": int(tenure),
+        "MonthlyCharges": float(MonthlyCharges),
+        "TotalCharges": float(TotalCharges),
+    }
+    result = predict(data)
+    return str(result)
+
+# === GRADIO UI CONFIGURATION ===
+demo = gr.Interface(
+    fn=gradio_interface,
+    inputs=[
+        gr.Dropdown(["Male", "Female"], label="Gender", value="Male"),
+        gr.Dropdown(["Yes", "No"], label="Partner", value="No"),
+        gr.Dropdown(["Yes", "No"], label="Dependents", value="No"),
+        gr.Dropdown(["Yes", "No"], label="Phone Service", value="Yes"),
+        gr.Dropdown(["Yes", "No", "No phone service"], label="Multiple Lines", value="No"),
+        gr.Dropdown(["DSL", "Fiber optic", "No"], label="Internet Service", value="Fiber optic"),
+        gr.Dropdown(["Yes", "No", "No internet service"], label="Online Security", value="No"),
+        gr.Dropdown(["Yes", "No", "No internet service"], label="Online Backup", value="No"),
+        gr.Dropdown(["Yes", "No", "No internet service"], label="Device Protection", value="No"),
+        gr.Dropdown(["Yes", "No", "No internet service"], label="Tech Support", value="No"),
+        gr.Dropdown(["Yes", "No", "No internet service"], label="Streaming TV", value="Yes"),
+        gr.Dropdown(["Yes", "No", "No internet service"], label="Streaming Movies", value="Yes"),
+        gr.Dropdown(["Month-to-month", "One year", "Two year"], label="Contract", value="Month-to-month"),
+        gr.Dropdown(["Yes", "No"], label="Paperless Billing", value="Yes"),
+        gr.Dropdown([
+            "Electronic check", "Mailed check",
+            "Bank transfer (automatic)", "Credit card (automatic)"
+        ], label="Payment Method", value="Electronic check"),
+        gr.Number(label="Tenure (months)", value=1, minimum=0, maximum=100),
+        gr.Number(label="Monthly Charges ($)", value=85.0, minimum=0, maximum=200),
+        gr.Number(label="Total Charges ($)", value=85.0, minimum=0, maximum=10000),
+        gr.Dropdown(["No", "Yes"], label="Senior Citizen", value="No"),
+    ],
+    outputs=gr.Textbox(label="Churn Prediction", lines=2),
+    title="🔮 Telco Customer Churn Predictor",
+    description="""
+    **Predict customer churn probability using machine learning**
+    
+    Fill in the customer details below to get a churn prediction. The model uses XGBoost trained on 
+    historical telecom customer data to identify customers at risk of churning.
+    """,
+    examples=[
+        ["Female", "No", "No", "Yes", "No", "Fiber optic", "No", "No", "No", 
+         "No", "Yes", "Yes", "Month-to-month", "Yes", "Electronic check", 
+         1, 85.0, 85.0, "No"],
+        ["Male", "Yes", "Yes", "Yes", "Yes", "DSL", "Yes", "Yes", "Yes",
+         "Yes", "No", "No", "Two year", "No", "Credit card (automatic)",
+         60, 45.0, 2700.0, "No"]
+    ]
+)
+
+# === MOUNT GRADIO UI INTO FASTAPI ===
+app = gr.mount_gradio_app(
+    app,
+    demo,
+    path="/ui"
+)
