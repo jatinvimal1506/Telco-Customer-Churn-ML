@@ -1,0 +1,7 @@
+-r requirements.txt
+pytest
+httpx
+jupyter
+ipykernel
+black
+flake8
