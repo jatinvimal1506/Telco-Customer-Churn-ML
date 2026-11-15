@@ -1,22 +1,41 @@
+# for data Processing
 pandas
 numpy
 scipy
+
+# machine learning libraries
 scikit-learn
 imbalanced-learn
 xgboost
 lightgbm
 catboost
+
+# feature engineering
 category-encoders
+
+# hyperparameter tuning
 optuna
+
+# explainable AI
 shap
+
+# to plot things
 matplotlib
 seaborn
 plotly
+
+# data validation
 great-expectations
+
+# API and Deployment
 fastapi
 uvicorn[standard]
 gradio
+
+# Model Tracking
 mlflow
+
+# Utilities
 joblib
 python-dotenv
 PyYAML

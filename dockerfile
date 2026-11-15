@@ -1,24 +1,22 @@
-# 1. Use the official lightweight Python base image
+# 1. Use official lightweight Python base image
 FROM python:3.11-slim
 
-# 2. Set working directory inside the container
+# 2. Set working directory
 WORKDIR /app
 
-# 3. Copy only dependency file first (for Docker caching)
+# 3. Copy dependency file first for Docker layer caching
 COPY requirements.txt .
 
-# 4. Install Python dependencies
+# 4. Install system packages and Python dependencies
 RUN pip install --upgrade pip \
-    && pip install -r requirements.txt \
+    && pip install --no-cache-dir -r requirements.txt \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# 5. Copy the entire project into the image
+# 5. Copy project source code and artifacts
 COPY . .
 
-# Copy model artifacts
-COPY src/serving/model /app/src/serving/model
-COPY src/serving/model/3b1a41221fc44548aed629fa42b762e0/artifacts/model /app/model
-COPY src/serving/model/3b1a41221fc44548aed629fa42b762e0/artifacts/feature_columns.txt /app/model/feature_columns.txt
+# Copy trained model and feature definitions to /app/model
+COPY artifacts/model /app/model
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app
@@ -26,6 +24,5 @@ ENV PYTHONUNBUFFERED=1 \
 # 6. Expose FastAPI port
 EXPOSE 8000
 
-# 7. Run the FastAPI app using uvicorn
+# 7. Start application via Uvicorn
 CMD ["python", "-m", "uvicorn", "src.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-
