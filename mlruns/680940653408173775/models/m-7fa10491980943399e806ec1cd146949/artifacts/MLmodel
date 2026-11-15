@@ -1,0 +1,22 @@
+artifact_path: file:///C:/Users/kaila/OneDrive/Desktop/DS3010_Project/telco-churn/mlruns/680940653408173775/models/m-7fa10491980943399e806ec1cd146949/artifacts
+flavors:
+  python_function:
+    data: model.ubj
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.xgboost
+    python_version: 3.12.8
+  xgboost:
+    code: null
+    data: model.ubj
+    model_class: xgboost.sklearn.XGBClassifier
+    model_format: ubj
+    xgb_version: 3.4.1
+mlflow_version: 3.18.0
+model_id: m-7fa10491980943399e806ec1cd146949
+model_size_bytes: 1380777
+model_uuid: m-7fa10491980943399e806ec1cd146949
+prompts: null
+run_id: 91995bae279c47b3a8cc9b5638ebeb7b
+utc_time_created: '2026-11-15 17:56:43.313551'
