@@ -42,7 +42,7 @@ def test_via_testclient():
     print("Predict status:", res_pred.status_code, "body:", res_pred.json())
     assert res_pred.status_code == 200
     assert "prediction" in res_pred.json()
-    print("✅ In-process FastAPI TestClient test PASSED!")
+    print("In-process FastAPI TestClient test PASSED!")
 
 def test_via_http():
     import requests

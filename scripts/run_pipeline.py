@@ -63,7 +63,7 @@ def main(args):
     Main training pipeline orchestrator.
     """
     input_file = resolve_input_file(args.input)
-    print(f"📁 Using input dataset: {input_file}")
+    print(f"Using input dataset: {input_file}")
 
     # === MLflow Setup ===
     mlruns_path = args.mlflow_uri or f"file:///{os.path.abspath(os.path.join(project_root, 'mlruns')).replace(os.sep, '/')}"
@@ -72,7 +72,7 @@ def main(args):
 
     with mlflow.start_run() as run:
         run_id = run.info.run_id
-        print(f"🚀 Started MLflow run ID: {run_id}")
+        print(f"Started MLflow run ID: {run_id}")
 
         # Log params
         mlflow.log_param("model", "xgboost")
@@ -80,32 +80,32 @@ def main(args):
         mlflow.log_param("test_size", args.test_size)
 
         # === STAGE 1: Data Loading & Validation ===
-        print("🔄 Loading data...")
+        print("Loading data...")
         df = load_data(input_file)
-        print(f"✅ Data loaded: {df.shape[0]} rows, {df.shape[1]} columns")
+        print(f"Data loaded: {df.shape[0]} rows, {df.shape[1]} columns")
 
-        print("🔍 Validating data quality with Great Expectations...")
+        print("Validating data quality with Great Expectations...")
         is_valid, failed = validate_telco_data(df)
         mlflow.log_metric("data_quality_pass", int(is_valid))
 
         if not is_valid:
             mlflow.log_text(json.dumps(failed, indent=2), artifact_file="failed_expectations.json")
-            raise ValueError(f"❌ Data quality check failed. Issues: {failed}")
+            raise ValueError(f"Data quality check failed. Issues: {failed}")
         else:
-            print("✅ Data validation passed. Logged to MLflow.")
+            print("Data validation passed. Logged to MLflow.")
 
         # === STAGE 2: Data Preprocessing ===
-        print("🔧 Preprocessing data...")
+        print("Preprocessing data...")
         target = args.target
         df = preprocess_data(df, target_col=target)
 
         processed_path = os.path.join(project_root, "data", "processed", "telco_churn_processed.csv")
         os.makedirs(os.path.dirname(processed_path), exist_ok=True)
         df.to_csv(processed_path, index=False)
-        print(f"✅ Processed dataset saved to {processed_path} | Shape: {df.shape}")
+        print(f"Processed dataset saved to {processed_path} | Shape: {df.shape}")
 
         # === STAGE 3: Feature Engineering ===
-        print("🛠️  Building features...")
+        print(" Building features...")
         if target not in df.columns:
             raise ValueError(f"Target column '{target}' not found in data")
 
@@ -113,7 +113,7 @@ def main(args):
 
         for c in df_enc.select_dtypes(include=["bool"]).columns:
             df_enc[c] = df_enc[c].astype(int)
-        print(f"✅ Feature engineering completed: {df_enc.shape[1]} features")
+        print(f"Feature engineering completed: {df_enc.shape[1]} features")
 
         # Save Feature Metadata for Serving Consistency
         artifacts_dir = os.path.join(project_root, "artifacts")
@@ -135,10 +135,10 @@ def main(args):
         }
         joblib.dump(preprocessing_artifact, os.path.join(artifacts_dir, "preprocessing.pkl"))
         mlflow.log_artifact(os.path.join(artifacts_dir, "preprocessing.pkl"))
-        print(f"✅ Saved {len(feature_cols)} feature columns for serving consistency")
+        print(f"Saved {len(feature_cols)} feature columns for serving consistency")
 
         # === STAGE 4: Train/Test Split ===
-        print("📊 Splitting data...")
+        print("Splitting data...")
         X = df_enc.drop(columns=[target])
         y = df_enc[target]
 
@@ -148,13 +148,13 @@ def main(args):
             stratify=y,
             random_state=42
         )
-        print(f"✅ Train: {X_train.shape[0]} samples | Test: {X_test.shape[0]} samples")
+        print(f"Train: {X_train.shape[0]} samples | Test: {X_test.shape[0]} samples")
 
         scale_pos_weight = (y_train == 0).sum() / (y_train == 1).sum()
-        print(f"📈 Class imbalance ratio: {scale_pos_weight:.2f} (applied to positive class)")
+        print(f" Class imbalance ratio: {scale_pos_weight:.2f} (applied to positive class)")
 
         # === STAGE 5: Model Training ===
-        print("🤖 Training XGBoost model...")
+        print(" Training XGBoost model...")
         model = XGBClassifier(
             n_estimators=301,
             learning_rate=0.034,
@@ -171,10 +171,10 @@ def main(args):
         model.fit(X_train, y_train)
         train_time = time.time() - t0
         mlflow.log_metric("train_time", train_time)
-        print(f"✅ Model trained in {train_time:.2f} seconds")
+        print(f"Model trained in {train_time:.2f} seconds")
 
         # === STAGE 6: Model Evaluation ===
-        print("📊 Evaluating model performance...")
+        print("Evaluating model performance...")
         t1 = time.time()
         proba = model.predict_proba(X_test)[:, 1]
         y_pred = (proba >= args.threshold).astype(int)
@@ -191,12 +191,12 @@ def main(args):
         mlflow.log_metric("f1", f1)
         mlflow.log_metric("roc_auc", roc_auc)
 
-        print(f"🎯 Model Performance:")
-        print(f"   Precision: {precision:.3f} | Recall: {recall:.3f}")
-        print(f"   F1 Score: {f1:.3f} | ROC AUC: {roc_auc:.3f}")
+        print(f"Model Performance:")
+        print(f"Precision: {precision:.3f} | Recall: {recall:.3f}")
+        print(f"F1 Score: {f1:.3f} | ROC AUC: {roc_auc:.3f}")
 
         # === STAGE 7: Model Serialization and Logging ===
-        print("💾 Saving model to MLflow and local artifacts...")
+        print("Saving model to MLflow and local artifacts...")
         mlflow.xgboost.log_model(model, artifact_path="model")
 
         # Also save model artifacts directly to artifacts/model for immediate serving
@@ -210,14 +210,14 @@ def main(args):
         with open(os.path.join(local_model_dir, "feature_columns.txt"), "w") as f:
             f.write("\n".join(feature_cols))
 
-        print(f"✅ Model saved to MLflow and {local_model_dir}")
+        print(f"Model saved to MLflow and {local_model_dir}")
 
-        print(f"\n⏱️ Performance Summary:")
+        print(f"\nPerformance Summary:")
         print(f"   Training time: {train_time:.2f}s")
         print(f"   Inference time: {pred_time:.4f}s")
         print(f"   Samples per second: {len(X_test)/pred_time:.0f}")
 
-        print(f"\n📈 Detailed Classification Report:")
+        print(f"\nDetailed Classification Report:")
         print(classification_report(y_test, y_pred, digits=3))
 
         return model

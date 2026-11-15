@@ -46,7 +46,7 @@ def main():
     print(f"Data after feature engineering. Shape: {df_features.shape}")
     print(df_features.head(3))
 
-    print("\n✅ Phase 1 pipeline completed successfully!")
+    print("\nPhase 1 pipeline completed successfully!")
 
 if __name__ == "__main__":
     main()
